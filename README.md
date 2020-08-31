@@ -2,7 +2,7 @@
 
 This is my first attempt at simulating a basic isometric world.
 
-![](isometric_terrain_simulation.gif)
+![](isometric_terrain_simulation.png)
 
 ## Controls
 
