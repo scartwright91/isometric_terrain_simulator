@@ -7,10 +7,11 @@ from game.settings import *
 from game.utils import cart_to_iso, load_images
 
 
-def create_iso_world(shape, res, sealevelp=30, gradient='radial'):
+def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
 
     # Import images
-    images = load_images(1)
+    scale = 1
+    images = load_images(scale)
 
     # Simulate sea level
     sea_level_world = generate_radial_gradient(shape, res)
@@ -81,20 +82,37 @@ def create_iso_world(shape, res, sealevelp=30, gradient='radial'):
         if tile['new_tile_type'] == 'water_rock_tile':
             tile['iso_topleft'][1] -= 14
 
-    maxx, minx = max([tile['iso_bottomright'][0] for tile in tiles]), min([tile['iso_topleft'][0] for tile in tiles])
-    maxy, miny = max([tile['iso_bottomright'][1] for tile in tiles]), min([tile['iso_topleft'][1] for tile in tiles])
-    rangex = int(maxx - minx)
-    rangey = int(maxy - miny)
-    print((rangex, rangey))
 
-    world_surf = pg.Surface((rangex, rangey))
+    # Define different world surfaces at 4 zoom levels
+    world_surfaces = {}
+    for scale_factor in [0, 1, 2, 3]:
 
-    # Blit all tiles
-    for tile in tiles:
-        tile['iso_topleft'][0] += abs(minx)
-        world_surf.blit(images[tile['new_tile_type']], (tile['iso_topleft']))
+        for tile in tiles:
+            dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * scale_factor
+            dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * scale_factor
 
-    return world_surf
+            tile['iso_topleft'][0] -= dx
+            tile['iso_topleft'][1] -= dy
+
+        scale = scale * (1 + scale_factor)
+        images = load_images(scale)
+
+        maxx, minx = max([tile['iso_topleft'][0] for tile in tiles]), min([tile['iso_topleft'][0] for tile in tiles])
+        maxy, miny = max([tile['iso_topleft'][1] for tile in tiles]), min([tile['iso_topleft'][1] for tile in tiles])
+        rangex = int(maxx - minx)
+        rangey = int(maxy - miny)
+
+        world_surf = pg.Surface((rangex, rangey))
+
+        # Blit all tiles
+        for tile in tiles:
+            tile['iso_topleft'][0] += abs(minx)
+            tile['iso_topleft'][1] -= abs(miny)
+            world_surf.blit(images[tile['new_tile_type']], (tile['iso_topleft']))
+
+        world_surfaces[scale_factor] = world_surf
+
+    return world_surfaces
 
 def generate_perlin_noise_2d(shape, res, tileable=(False, False)):
     def f(t):

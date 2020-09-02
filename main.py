@@ -6,19 +6,18 @@ from game.utils import read_image
 from game.settings import *
 from game.simulate_world import create_iso_world, generate_perlin_noise_2d
 
-# Create world tiles
-world_surface = create_iso_world((256, 256), (8, 8), "radial")
-
 pg.init()
 pg.mixer.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
 
+# Create world tiles
+world_surfaces = create_iso_world(screen, (150, 150), (5, 5), "radial")
+
 #variables
 tide_coming_in = True
 tide_gain = 0.05
-scale = 1
-scale_factor = 0.5
+zoom_level = 0
 blit_pos = [0, 0]
 
 
@@ -52,37 +51,15 @@ while True:
     if right:
         blit_pos[0] -= TILE_SIZE
 
-    # # Zoom in feature
-    # if zoom_in:
-
-    #     # Platforms
-    #     for tile in tiles:
-    #         dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * scale_factor
-    #         dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * scale_factor
-
-    #         tile['iso_topleft'][0] -= dx
-    #         tile['iso_topleft'][1] -= dy
-
-    #     scale = scale * (1 + scale_factor)
-    #     images = load_images(scale)
-
-    # # zoom out feature
-    # if zoom_out:
-
-    #     # Platforms
-    #     for tile in tiles:
-    #         dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * -scale_factor
-    #         dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * -scale_factor
-
-    #         tile['iso_topleft'][0] -= dx
-    #         tile['iso_topleft'][1] -= dy
-
-    #     scale = scale * (1 - scale_factor)
-    #     images = load_images(scale)
+    # # Zoom feature
+    if zoom_in:
+        if zoom_level < 3: zoom_level += 1
+    if zoom_out:
+        if zoom_level > 0: zoom_level -= 1
 
     # Draw section
     screen.fill((255, 255, 255))
 
-    screen.blit(world_surface, blit_pos)
+    screen.blit(world_surfaces[zoom_level], blit_pos)
 
     pg.display.flip()
