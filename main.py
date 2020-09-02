@@ -2,12 +2,12 @@
 import pygame as pg
 import sys
 import random
-from game.utils import load_images, read_image
+from game.utils import read_image
 from game.settings import *
 from game.simulate_world import create_iso_world, generate_perlin_noise_2d
 
 # Create world tiles
-tiles = create_iso_world((256, 256), (8, 8), "radial")
+world_surface = create_iso_world((256, 256), (8, 8), "radial")
 
 pg.init()
 pg.mixer.init()
@@ -19,7 +19,8 @@ tide_coming_in = True
 tide_gain = 0.05
 scale = 1
 scale_factor = 0.5
-images = load_images(scale)
+blit_pos = [0, 0]
+
 
 while True:
 
@@ -43,54 +44,45 @@ while True:
     zoom_out = pressed[pg.K_x]
 
     if up:
-        for tile in tiles:
-            tile['iso_topleft'][1] += TILE_SIZE
+        blit_pos[1] += TILE_SIZE
     if down:
-        for tile in tiles:
-            tile['iso_topleft'][1] -= TILE_SIZE
+        blit_pos[1] -= TILE_SIZE
     if left:
-        for tile in tiles:
-            tile['iso_topleft'][0] += TILE_SIZE
+        blit_pos[0] += TILE_SIZE
     if right:
-        for tile in tiles:
-            tile['iso_topleft'][0] -= TILE_SIZE
+        blit_pos[0] -= TILE_SIZE
 
-    # Zoom in feature
-    if zoom_in:
+    # # Zoom in feature
+    # if zoom_in:
 
-        # Platforms
-        for tile in tiles:
-            dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * scale_factor
-            dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * scale_factor
+    #     # Platforms
+    #     for tile in tiles:
+    #         dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * scale_factor
+    #         dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * scale_factor
 
-            tile['iso_topleft'][0] -= dx
-            tile['iso_topleft'][1] -= dy
+    #         tile['iso_topleft'][0] -= dx
+    #         tile['iso_topleft'][1] -= dy
 
-        scale = scale * (1 + scale_factor)
-        images = load_images(scale)
+    #     scale = scale * (1 + scale_factor)
+    #     images = load_images(scale)
 
-    # zoom out feature
-    if zoom_out:
+    # # zoom out feature
+    # if zoom_out:
 
-        # Platforms
-        for tile in tiles:
-            dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * -scale_factor
-            dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * -scale_factor
+    #     # Platforms
+    #     for tile in tiles:
+    #         dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * -scale_factor
+    #         dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * -scale_factor
 
-            tile['iso_topleft'][0] -= dx
-            tile['iso_topleft'][1] -= dy
+    #         tile['iso_topleft'][0] -= dx
+    #         tile['iso_topleft'][1] -= dy
 
-        scale = scale * (1 - scale_factor)
-        images = load_images(scale)
+    #     scale = scale * (1 - scale_factor)
+    #     images = load_images(scale)
 
     # Draw section
     screen.fill((255, 255, 255))
 
-    for tile in tiles:
-
-        blit_pos = tile['iso_topleft'].copy()
-        tile_image = tile['new_tile_type']
-
-        screen.blit(images[tile_image], blit_pos)
+    screen.blit(world_surface, blit_pos)
 
     pg.display.flip()
