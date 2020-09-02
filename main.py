@@ -53,9 +53,9 @@ while True:
 
     # # Zoom feature
     if zoom_in:
-        if zoom_level < 3: zoom_level += 1
-    if zoom_out:
         if zoom_level > 0: zoom_level -= 1
+    if zoom_out:
+        if zoom_level < 3: zoom_level += 1
 
     # Draw section
     screen.fill((255, 255, 255))

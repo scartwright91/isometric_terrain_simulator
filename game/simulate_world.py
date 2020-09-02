@@ -11,6 +11,7 @@ def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
 
     # Import images
     scale = 1
+    scale_factor = 0.5
     images = load_images(scale)
 
     # Simulate sea level
@@ -82,19 +83,20 @@ def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
         if tile['new_tile_type'] == 'water_rock_tile':
             tile['iso_topleft'][1] -= 14
 
-
     # Define different world surfaces at 4 zoom levels
     world_surfaces = {}
-    for scale_factor in [0, 1, 2, 3]:
+    for zoom_level in [0, 1, 2, 3]:
 
+        # Platforms
         for tile in tiles:
-            dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * scale_factor
-            dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * scale_factor
+            dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * -scale_factor
+            dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * -scale_factor
 
             tile['iso_topleft'][0] -= dx
             tile['iso_topleft'][1] -= dy
 
-        scale = scale * (1 + scale_factor)
+        if zoom_level > 0:
+            scale = scale * scale_factor
         images = load_images(scale)
 
         maxx, minx = max([tile['iso_topleft'][0] for tile in tiles]), min([tile['iso_topleft'][0] for tile in tiles])
@@ -106,11 +108,16 @@ def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
 
         # Blit all tiles
         for tile in tiles:
+
+            # Correct blitting height
+            tile['iso_topleft'][1] -= abs(images[tile['new_tile_type']].get_height() - images['grass_tile'].get_height())
+
             tile['iso_topleft'][0] += abs(minx)
             tile['iso_topleft'][1] -= abs(miny)
+
             world_surf.blit(images[tile['new_tile_type']], (tile['iso_topleft']))
 
-        world_surfaces[scale_factor] = world_surf
+        world_surfaces[zoom_level] = world_surf
 
     return world_surfaces
 
