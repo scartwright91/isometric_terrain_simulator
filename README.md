@@ -21,3 +21,7 @@ The simulation currently involves two steps:
 
 * Remove all hard coded values and parameterise everything.
 * Introduce more base distributions for different land formations.
+
+# Assets
+
+Assets taken from https://www.kenney.nl/assets/nature-kit :-) 

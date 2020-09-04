@@ -1,16 +1,16 @@
 
 import pygame as pg
-from utils import read_image, cart_to_iso
-from settings import *
+from game.utils import read_image, cart_to_iso
+from game.settings import *
 
 
 class Player(pg.sprite.Sprite):
 
     def __init__(self, pos):
         pg.sprite.Sprite.__init__(self)
-        self.player_image = read_image('images/player.png')
-        self.image = pg.Surface((TILE_SIZE/2, TILE_SIZE/2))
-        self.image.fill((0, 150, 255))
+        self.player_image = read_image("images/crusader_stand.png", h=TILE_SIZE*2)
+        self.image = pg.Surface((TILE_SIZE*2, TILE_SIZE*2))
+        self.image.blit(self.player_image, (0, 0))
         self.rect = self.image.get_rect(center=pos)
 
     def update(self):

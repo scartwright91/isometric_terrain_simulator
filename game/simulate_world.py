@@ -7,7 +7,7 @@ from game.settings import *
 from game.utils import cart_to_iso, load_images
 
 
-def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
+def create_iso_world(screen, shape, res, gradient='radial'):
 
     # Import images
     scale = 1
@@ -43,27 +43,33 @@ def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
 
             if sea_level_val < 40:
                 if random.randint(1, 100) == 1:
-                    tile_type = 'water_rock_tile'
+                    tile_type = 'deep_water_rock_tile_NE'
                 else:
-                    tile_type = 'deep_water_tile'
+                    tile_type = 'deep_water_tile_NE'
             elif sea_level_val < 50:
-                if temp_val < 0:
-                    tile_type = 'deep_water_tile'
-                else:
-                    tile_type = 'water_tile'
+                tile_type = 'water_tile_NE'
             elif sea_level_val < 60:
-                if temp_val < 0:
-                    tile_type = 'snow_tile'
+                rand = random.randint(1, 100)
+                if rand < 97:
+                    tile_type = 'sand_tile_NE'
                 else:
-                    tile_type = 'sand_tile'
+                    tile_type = 'tree_palm_NE'
+            elif sea_level_val < 80:
+                rand = random.randint(1, 100)
+                if rand < 95:
+                    tile_type = 'ground_grass_NE'
+                elif rand < 97:
+                    tile_type = 'tree_plateau_dark_NE'
+                else:
+                    tile_type = 'tree_pineTallD_NW'
             else:
-                if temp_val < 0:
-                    tile_type = 'snow_tile'
+                rand = random.randint(1, 100)
+                if rand < 85:
+                    tile_type = 'ground_grass_NE'
+                elif rand < 90:
+                    tile_type = 'tree_plateau_dark_NE'
                 else:
-                    if random.randint(1, 15) == 1:
-                        tile_type = 'tree_tile'
-                    else:
-                        tile_type = 'grass_tile'
+                    tile_type = 'tree_pineTallD_NW'
 
             tiles.append({
                         'pos': [x, y],
@@ -76,31 +82,43 @@ def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
                         'iso_topleft': iso_topleft,
                         'iso_bottomright': iso_bottomright})
 
+    maxx, minx = max([tile['iso_bottomright'][0] for tile in tiles]), min([tile['iso_topleft'][0] for tile in tiles])
+    maxy, miny = max([tile['iso_bottomright'][1] for tile in tiles]), min([tile['iso_topleft'][1] for tile in tiles])
+
     # Modify blitting position
     for tile in tiles:
-        if tile['new_tile_type'] == 'tree_tile':
-            tile['iso_topleft'][1] -= 50
-        if tile['new_tile_type'] == 'water_rock_tile':
-            tile['iso_topleft'][1] -= 14
+        # Correct blitting height
+        tile['iso_topleft'][1] -= abs(images[tile['new_tile_type']].get_height() - images['water_tile_NE'].get_height())
+        tile['iso_bottomright'][1] -= abs(images[tile['new_tile_type']].get_height() - images['water_tile_NE'].get_height())
+        # Correct blitting height
+        tile['iso_topleft'][0] -= abs(images[tile['new_tile_type']].get_width() - images['water_tile_NE'].get_width())
+        tile['iso_bottomright'][0] -= abs(images[tile['new_tile_type']].get_width() - images['water_tile_NE'].get_width())
 
     # Define different world surfaces at 4 zoom levels
     world_surfaces = {}
-    for zoom_level in [0, 1, 2, 3]:
-
-        # Platforms
-        for tile in tiles:
-            dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * -scale_factor
-            dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * -scale_factor
-
-            tile['iso_topleft'][0] -= dx
-            tile['iso_topleft'][1] -= dy
+    for zoom_level in [0, 1, 2]:
 
         if zoom_level > 0:
-            scale = scale * scale_factor
+
+            # Platforms
+            for tile in tiles:
+                dx = (screen.get_width()/2 - tile['iso_topleft'][0]) * -scale_factor
+                dy = (screen.get_height()/2 - tile['iso_topleft'][1]) * -scale_factor
+
+                tile['iso_topleft'][0] -= dx
+                tile['iso_topleft'][1] -= dy
+                tile['iso_bottomright'][0] -= dx
+                tile['iso_bottomright'][1] -= dy
+
+            scale = scale * (1 - scale_factor)
+        
+        else:
+            scale = 1
+
         images = load_images(scale)
 
-        maxx, minx = max([tile['iso_topleft'][0] for tile in tiles]), min([tile['iso_topleft'][0] for tile in tiles])
-        maxy, miny = max([tile['iso_topleft'][1] for tile in tiles]), min([tile['iso_topleft'][1] for tile in tiles])
+        maxx, minx = max([tile['iso_bottomright'][0] for tile in tiles]), min([tile['iso_topleft'][0] for tile in tiles])
+        maxy, miny = max([tile['iso_bottomright'][1] for tile in tiles]), min([tile['iso_topleft'][1] for tile in tiles])
         rangex = int(maxx - minx)
         rangey = int(maxy - miny)
 
@@ -108,13 +126,18 @@ def create_iso_world(screen, shape, res, sealevelp=30, gradient='radial'):
 
         # Blit all tiles
         for tile in tiles:
-
-            # Correct blitting height
-            tile['iso_topleft'][1] -= abs(images[tile['new_tile_type']].get_height() - images['grass_tile'].get_height())
-
-            tile['iso_topleft'][0] += abs(minx)
-            tile['iso_topleft'][1] -= abs(miny)
-
+            if minx < 0:
+                tile['iso_topleft'][0] += abs(minx)
+                tile['iso_bottomright'][0] += abs(minx)
+            else:
+                tile['iso_topleft'][0] -= abs(minx)
+                tile['iso_bottomright'][0] -= abs(minx)
+            if miny < 0:
+                tile['iso_topleft'][1] += abs(miny)
+                tile['iso_bottomright'][1] += abs(miny)
+            else:
+                tile['iso_topleft'][1] -= abs(miny)
+                tile['iso_bottomright'][1] -= abs(miny)
             world_surf.blit(images[tile['new_tile_type']], (tile['iso_topleft']))
 
         world_surfaces[zoom_level] = world_surf
