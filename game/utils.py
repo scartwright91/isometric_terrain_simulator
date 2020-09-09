@@ -5,6 +5,13 @@ import re
 from game.settings import *
 
 
+def draw_text(screen, text, size, color, x, y):
+    font = pg.font.SysFont(None, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.topleft = (x, y)
+    screen.blit(text_surface, text_rect)
+
 def load_images(scale):
 
     img_path = 'images/'
@@ -13,15 +20,18 @@ def load_images(scale):
 
     for img in os.listdir(img_path):
 
-        tmp_img = read_image(img_path + img)
-
         img_name = img.split('.')[0]
+
+        if img_name == 'ground_grass_NE.png':
+            tmp_img = read_image(img_path + img, w=68, h=35)
+        else:
+            tmp_img = read_image(img_path + img)
+
         imgs[img_name] = read_image(img_path + img,
                                     w=tmp_img.get_width()*scale,
                                     h=tmp_img.get_height()*scale)
                                     
     return imgs
-
 
 def read_image(path, w=None, h=None, create_surface=False):
 
