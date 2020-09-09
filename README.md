@@ -19,7 +19,8 @@ The simulation currently involves two steps:
 
 ## TO DO
 
-* Remove all hard coded values and parameterise everything.
+* Find local maxima for more rivers
+* Redesign tiles to have x, y keys for faster lookup
 * Introduce more base distributions for different land formations.
 
 # Assets

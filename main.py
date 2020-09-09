@@ -8,12 +8,12 @@ from game.simulate_world import create_iso_world, generate_perlin_noise_2d
 
 pg.init()
 pg.mixer.init()
-#screen = pg.display.set_mode((WIDTH, HEIGHT))
-screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
+screen = pg.display.set_mode((WIDTH, HEIGHT))
+#screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
 clock = pg.time.Clock()
 
 # Create world tiles
-world_surfaces = create_iso_world(screen, (200, 200), (10, 10), "radial")
+world_surfaces = create_iso_world(screen, (100, 100), (10, 10))
 
 # variables
 tide_coming_in = True
@@ -62,9 +62,9 @@ while True:
             blit_pos = [-world_surfaces[zoom_level].get_width()/2, -world_surfaces[zoom_level].get_height()/2]
 
     # Draw section
-    screen.fill((255, 255, 255))
+    screen.fill((0, 0, 0))
 
     screen.blit(world_surfaces[zoom_level], blit_pos)
 
-    draw_text(screen, "{}, {}".format(blit_pos[0], blit_pos[1]), 50, (255, 0, 0), 50, 50)
+    #draw_text(screen, "{}, {}".format(blit_pos[0], blit_pos[1]), 50, (255, 0, 0), 50, 50)
     pg.display.flip()
